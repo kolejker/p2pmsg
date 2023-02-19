@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>koliker mesage</title>
+  </head>
+  <body>
+    <div id="chat-area"></div>
+    <form id="message-form">
+      <input type="text" id="message-input" placeholder="enter message" />
+      <button type="submit">Send</button>
+    </form>
+    <script>
+      // Generate a unique ID for this device
+      const myId =
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+
+      // Set up a WebSocket connection to listen for incoming messages
+      const socket = new WebSocket(`ws://kolikiscool.github.io/p2pmsg/${myId}`);
+      socket.onmessage = function (event) {
+        const message = JSON.parse(event.data);
+        displayMessage(message.sender, message.content);
+      };
+
+      // Send a message when the form is submitted
+      document
+        .getElementById("message-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const messageInput = document.getElementById("message-input");
+          const message = {
+            sender: myId,
+            content: messageInput.value,
+          };
+          socket.send(JSON.stringify(message));
+          displayMessage(myId, messageInput.value);
+          messageInput.value = "";
+        });
+
+      // Display a message in the chat area
+      function displayMessage(sender, content) {
+        const chatArea = document.getElementById("chat-area");
+        const messageElement = document.createElement("div");
+        messageElement.innerHTML = `<strong>${sender}:</strong> ${content}`;
+        chatArea.appendChild(messageElement);
+      }
+    </script>
+  </body>
+</html>
